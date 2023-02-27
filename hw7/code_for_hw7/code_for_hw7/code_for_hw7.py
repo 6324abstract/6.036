@@ -50,27 +50,29 @@ class Tanh(Module):  # Layer activation
         return self.A
 
     def backward(self, dLdA):  # Uses stored self.A
-        return None  # Your code: return dLdZ (?, b)
+        return self.A@dLdA    # Your code: return dLdZ (?, b)
 
 
-class ReLU(Module):  # Layer activation
+class ReLU(Module):              # Layer activation
     def forward(self, Z):
-        self.A = None  # Your code: (?, b)
+        self.A = np.where(Z>0,Z,0)           # Your code: (?, b)
         return self.A
 
-    def backward(self, dLdA):  # uses stored self.A
-        return None  # Your code: return dLdZ (?, b)
+    def backward(self, dLdA):    # uses stored self.A
+        return self.A@dLdA              # Your code: return dLdZ (?, b)
 
 
-class SoftMax(Module):  # Output activation
+class SoftMax(Module):           # Output activation
     def forward(self, Z):
-        return None  # Your code: (?, b)
+        ypred=np.exp(Z)
+        Ypred=ypred/np.sum(np.exp(Z),axis=0)
+        return Ypred             # Your code: (?, b)
 
-    def backward(self, dLdZ):  # Assume that dLdZ is passed in
+    def backward(self, dLdZ):    # Assume that dLdZ is passed in
         return dLdZ
 
     def class_fun(self, Ypred):  # Return class indices
-        return None  # Your code: (1, b)
+        return  np.array([np.amax(Ypred,axis=0)])                 # Your code: (1, b)
 
 
 # Loss modules
@@ -83,14 +85,14 @@ class SoftMax(Module):  # Output activation
 # with respect to the preactivation to SoftMax (note: not the
 # activation!), since we are always pairing SoftMax activation with
 # NLL loss
-class NLL(Module):  # Loss
+class NLL(Module):       # Loss
     def forward(self, Ypred, Y):
         self.Ypred = Ypred
         self.Y = Y
-        return None  # Your code: return loss (scalar)
+        return -np.sum(Y*np.log(Ypred))    # Your code
 
     def backward(self):  # Use stored self.Ypred, self.Y
-        return None  # Your code (?, b)
+        return self.Ypred-self.Y      # Your code
 
 
 # Neural Network implementation
